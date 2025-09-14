@@ -1,12 +1,12 @@
 """Agent tools for the UseNet client.
 
 This module provides LLMTool implementations that expo        result = self.service.list_newsgroups(pattern, max_results, all_groups, use_cache)
-        
+
         # Add intelligent hints for the LLM about potentially more results
         if result.get('success'):
             total_found = result.get('total_count', 0)
             was_limited = result.get('limited', False)
-            
+
             if was_limited and total_found >= max_results:
                 result['hint_more_available'] = (
                     f"⚠️ Found exactly {total_found} groups (the max requested). "
@@ -16,12 +16,12 @@ This module provides LLMTool implementations that expo        result = self.serv
                 result['ai_guidance'] = "MORE_RESULTS_LIKELY"
             else:
                 result['ai_guidance'] = "COMPLETE_RESULTS"
-                
+
             # Add user-friendly summary
             cache_status = "from cache" if result.get('used_cache') else "from server"
             pattern_text = f" matching '{pattern}'" if pattern else ""
             result['summary'] = f"Found {total_found} newsgroups{pattern_text} ({cache_status})"
-        
+
         return resultnt functionality
 to the mojentic conversational agent framework.
 """
@@ -43,16 +43,16 @@ class SetupProviderTool(LLMTool):
         host = kwargs.get('host')
         if not host:
             return {"success": False, "error": "Host parameter is required"}
-            
+
         port = kwargs.get('port', 119)
         username = kwargs.get('username')
         password = kwargs.get('password')
         use_ssl = kwargs.get('use_ssl', False)
-        
+
         # Convert types (LLM may pass strings)
         port = int(port) if isinstance(port, str) else port
         use_ssl = bool(use_ssl) if isinstance(use_ssl, str) else use_ssl
-        
+
         return self.service.setup_provider(host, port, username, password, use_ssl)
 
     @property
@@ -105,16 +105,16 @@ class ListNewsgroupsTool(LLMTool):
         # Extract and validate parameters
         pattern = kwargs.get('pattern')
         max_results = kwargs.get('max_results', 25)  # Increased default from 10 to 25
-        all_groups = kwargs.get('all_groups', False) 
+        all_groups = kwargs.get('all_groups', False)
         use_cache = kwargs.get('use_cache', True)
-        
+
         # Convert string parameters to proper types (LLM may pass strings)
         max_results = int(max_results) if isinstance(max_results, str) else max_results
         all_groups = bool(all_groups) if isinstance(all_groups, str) else all_groups
         use_cache = bool(use_cache) if isinstance(use_cache, str) else use_cache
-        
+
         result = self.service.list_newsgroups(pattern, max_results, all_groups, use_cache)
-        
+
         # Add intelligent hints for the LLM about potentially more results
         if result.get('success') and result.get('limited'):
             total_found = result.get('total_count', 0)
@@ -125,7 +125,7 @@ class ListNewsgroupsTool(LLMTool):
                     f"to see more (e.g., max_results=50 or max_results=100) or use all_groups=true "
                     f"to see all matching groups."
                 )
-        
+
         return result
 
     @property
@@ -174,7 +174,7 @@ class UpdateCacheTool(LLMTool):
         """Update the cached list of newsgroups from the NNTP server."""
         force = kwargs.get('force', False)
         force = bool(force) if isinstance(force, str) else force
-        
+
         return self.service.update_cache(force)
 
     @property
@@ -236,7 +236,7 @@ class SearchMessagesTool(LLMTool):
         newsgroup = kwargs.get('newsgroup')
         if not newsgroup:
             return {"success": False, "error": "Newsgroup parameter is required"}
-            
+
         poster = kwargs.get('poster')
         topic = kwargs.get('topic')
         since_days = kwargs.get('since_days', 7)
@@ -247,7 +247,7 @@ class SearchMessagesTool(LLMTool):
         multi_group = kwargs.get('multi_group', False)
         max_groups = kwargs.get('max_groups', 20)
         with_body = kwargs.get('with_body', False)
-        
+
         # Convert types
         since_days = int(since_days) if isinstance(since_days, str) else since_days
         max_messages = int(max_messages) if isinstance(max_messages, str) else max_messages
@@ -257,7 +257,7 @@ class SearchMessagesTool(LLMTool):
         multi_group = bool(multi_group) if isinstance(multi_group, str) else multi_group
         max_groups = int(max_groups) if isinstance(max_groups, str) else max_groups
         with_body = bool(with_body) if isinstance(with_body, str) else with_body
-        
+
         return self.service.search_messages(
             newsgroup, poster, topic, since_days, max_messages, use_llm,
             confidence, relevance, multi_group, max_groups, with_body
@@ -343,16 +343,16 @@ class ListMessagesTool(LLMTool):
         newsgroup_pattern = kwargs.get('newsgroup_pattern')
         if not newsgroup_pattern:
             return {"success": False, "error": "Newsgroup pattern parameter is required"}
-            
+
         period_days = kwargs.get('period_days', 7)
         max_messages = kwargs.get('max_messages', 100)
         max_groups = kwargs.get('max_groups', 15)
-        
+
         # Convert types
         period_days = int(period_days) if isinstance(period_days, str) else period_days
         max_messages = int(max_messages) if isinstance(max_messages, str) else max_messages
         max_groups = int(max_groups) if isinstance(max_groups, str) else max_groups
-        
+
         return self.service.list_messages(newsgroup_pattern, period_days, max_messages, max_groups)
 
     @property
@@ -402,20 +402,20 @@ class SummarizeCommunityTool(LLMTool):
         newsgroup_pattern = kwargs.get('newsgroup_pattern')
         if not newsgroup_pattern:
             return {"success": False, "error": "Newsgroup pattern parameter is required"}
-            
+
         period_days = kwargs.get('period_days', 7)
         max_messages = kwargs.get('max_messages', 200)
         max_groups = kwargs.get('max_groups', 15)
         community_name = kwargs.get('community_name')
         format_style = kwargs.get('format_style', "detailed")
         min_importance = kwargs.get('min_importance', 0.3)
-        
+
         # Convert types
         period_days = int(period_days) if isinstance(period_days, str) else period_days
         max_messages = int(max_messages) if isinstance(max_messages, str) else max_messages
         max_groups = int(max_groups) if isinstance(max_groups, str) else max_groups
         min_importance = float(min_importance) if isinstance(min_importance, str) else min_importance
-        
+
         return self.service.summarize_community(
             newsgroup_pattern, period_days, max_messages, max_groups,
             community_name, format_style, min_importance
