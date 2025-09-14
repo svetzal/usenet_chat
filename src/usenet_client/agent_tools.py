@@ -116,15 +116,24 @@ class ListNewsgroupsTool(LLMTool):
         result = self.service.list_newsgroups(pattern, max_results, all_groups, use_cache)
 
         # Add intelligent hints for the LLM about potentially more results
-        if result.get('success') and result.get('limited'):
+        if result.get('success'):
             total_found = result.get('total_count', 0)
-            if total_found >= max_results:
+            was_limited = result.get('limited', False)
+
+            if was_limited:
                 result['hint_more_available'] = (
-                    f"Found exactly {total_found} groups (the max requested). "
-                    f"There are likely more groups available. Consider increasing max_results "
-                    f"to see more (e.g., max_results=50 or max_results=100) or use all_groups=true "
-                    f"to see all matching groups."
+                    f"⚠️ Found exactly {total_found} groups (the max requested). "
+                    f"There are likely MORE groups available. Consider using max_results={max_results * 2} "
+                    f"or max_results=100 to see more, or use all_groups=true to see ALL matching groups."
                 )
+                result['ai_guidance'] = "MORE_RESULTS_LIKELY"
+            else:
+                result['ai_guidance'] = "COMPLETE_RESULTS"
+
+            # Add user-friendly summary
+            cache_status = "from cache" if result.get('used_cache') else "from server"
+            pattern_text = f" matching '{pattern}'" if pattern else ""
+            result['summary'] = f"Found {total_found} newsgroups{pattern_text} ({cache_status})"
 
         return result
 
