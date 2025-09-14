@@ -131,7 +131,7 @@ class LLMSearchEngine:
             self.community_summarizer = dspy.Predict(CommunitySummarizer)
 
             self.available = True
-            print("✅ LLM initialized successfully with Ollama")
+            # LLM initialized successfully - logging removed to reduce noise
         except Exception as e:
             # If LLM setup fails, disable LLM features
             print(f"Warning: LLM setup failed ({e}), falling back to simple matching")

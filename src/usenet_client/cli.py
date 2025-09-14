@@ -810,6 +810,10 @@ def interactive(
                 break
             except Exception as e:
                 console.print(f"\n❌ Error processing query: {e}", style="red")
+                # Show stack trace for debugging
+                import traceback
+                console.print("Debug information:", style="dim")
+                console.print(traceback.format_exc(), style="dim red")
                 console.print("Please try again or type 'exit' to quit.\n", style="dim")
 
     except Exception as e:
